@@ -60,6 +60,10 @@ AS-IS Software License Agreement © ATT IT / Philippe Simon Pflug. See `LICENSE.
 EOF
 
 mkdir -p "${TARGET_DIR}/.github/workflows"
+cat << 'EOF' > "${TARGET_DIR}/.gitignore"
+/target
+Cargo.lock
+EOF
 cat << 'EOF' > "${TARGET_DIR}/.github/workflows/ci.yml"
 name: Rust Crate CI
 
