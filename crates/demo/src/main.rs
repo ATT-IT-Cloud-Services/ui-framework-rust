@@ -105,6 +105,12 @@ fn ServicesDemo(topic: String) -> Element {
 #[allow(non_snake_case)]
 fn App() -> Element {
     rsx! {
+        document::Script {
+            src: "https://cdn.tailwindcss.com",
+        }
+        document::Style {
+            "{include_str!(\"../../../public/styles.css\")}"
+        }
         LayoutSettingsProvider {
             I18nProvider {
                 SessionProvider {
