@@ -1,0 +1,16 @@
+/target
+**/*.rs.bk
+Cargo.lock
+
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary
+/packages/ui-framework-rust-crate/target
+/packages/ui-framework-rust-crate/Cargo.lock

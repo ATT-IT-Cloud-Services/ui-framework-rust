@@ -1,0 +1,17 @@
+[package]
+name = "ui-framework-rust-crate"
+version = "0.1.0"
+edition = "2021"
+authors = ["ATT IT / Philippe Simon Pflug <service@att-it.com>"]
+description = "Host-agnostic enterprise UI framework for Dioxus 0.7 & Rust"
+license-file = "LICENSE.md"
+repository = "https://github.com/ATT-IT-Cloud-Services/ui-framework-rust"
+homepage = "https://github.com/ATT-IT-Cloud-Services/ui-framework-rust#readme"
+readme = "README.md"
+keywords = ["dioxus", "ui", "enterprise", "scada", "components"]
+categories = ["gui", "web-programming"]
+
+[dependencies]
+dioxus = { version = "0.7.0" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"

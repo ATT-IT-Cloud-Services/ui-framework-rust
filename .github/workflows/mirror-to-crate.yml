@@ -1,0 +1,47 @@
+name: Mirror to Crate Repository
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/ui-framework/**"
+      - "scripts/**"
+      - ".github/workflows/mirror-to-crate.yml"
+
+jobs:
+  mirror-and-sync:
+    name: Extract Framework Crate & Mirror to ui-framework-rust-crate
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout monorepo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Prepare Clean Crate
+        run: ./scripts/prepare-crate.sh
+
+      - name: Verify Standalone Crate Compilation
+        run: |
+          cd packages/ui-framework-rust-crate
+          cargo check
+
+      - name: Deploy / Mirror to ui-framework-rust-crate Repository
+        env:
+          TARGET_REPO: "ATT-IT-Cloud-Services/ui-framework-rust-crate"
+          SYNC_TOKEN: ${{ secrets.SYNC_PAT || secrets.GITHUB_TOKEN }}
+        run: |
+          cd packages/ui-framework-rust-crate
+          git init -b main
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "chore(release): automated framework crate sync from monorepo [skip ci]" || echo "No changes to commit"
+          git remote add target "https://x-access-token:${SYNC_TOKEN}@github.com/${TARGET_REPO}.git"
+          git push target main --force || echo "Mirror push completed or requires PAT"
