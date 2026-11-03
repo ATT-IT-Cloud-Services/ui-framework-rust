@@ -106,6 +106,25 @@ fn ServicesDemo(topic: String) -> Element {
 fn App() -> Element {
     rsx! {
         document::Script {
+            r#"try {{
+                var isDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+                if (isDark) {{
+                    document.documentElement.classList.add('dark');
+                    document.documentElement.style.colorScheme = 'dark';
+                }} else {{
+                    document.documentElement.classList.remove('dark');
+                    document.documentElement.style.colorScheme = 'light';
+                }}
+                var m = document.querySelector('meta[name="color-scheme"]');
+                if (!m) {{
+                    m = document.createElement('meta');
+                    m.name = 'color-scheme';
+                    document.head.appendChild(m);
+                }}
+                m.content = isDark ? 'dark' : 'light';
+            }} catch(e) {{}}"#
+        }
+        document::Script {
             src: "https://cdn.tailwindcss.com",
         }
         document::Style {

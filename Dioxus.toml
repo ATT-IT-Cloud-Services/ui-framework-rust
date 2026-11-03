@@ -1,0 +1,11 @@
+[application]
+name = "demo"
+asset_dir = "public"
+sub_package = "crates/demo"
+
+[web.app]
+title = "Enterprise UI Framework in Rust"
+
+[web.watcher]
+watch_path = ["crates"]
+index_on_404 = true

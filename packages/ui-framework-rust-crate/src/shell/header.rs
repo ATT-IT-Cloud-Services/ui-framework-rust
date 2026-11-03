@@ -1,6 +1,6 @@
 use dioxus::prelude::*;
 use crate::i18n::language_switcher::LanguageSwitcher;
-use crate::settings::provider::use_layout_settings;
+use crate::settings::provider::{use_is_dark, use_layout_settings};
 use crate::config::types::ThemeMode;
 
 #[component]
@@ -14,7 +14,7 @@ pub fn Header(
     let mut settings = use_layout_settings();
 
     let is_sticky = settings.read().header_sticky;
-    let is_dark = settings.read().theme == ThemeMode::Dark;
+    let is_dark = use_is_dark();
 
     rsx! {
         header {

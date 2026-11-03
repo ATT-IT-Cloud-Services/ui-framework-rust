@@ -1,5 +1,7 @@
 use dioxus::prelude::*;
 use ui_framework::ui::badge::{Badge, BadgeVariant};
+use ui_framework::settings::provider::{use_is_dark, use_layout_settings};
+use ui_framework::config::types::ThemeMode;
 
 struct DemoCardInfo {
     id: &'static str,
@@ -155,10 +157,19 @@ const DEMO_CARDS: &[DemoCardInfo] = &[
 
 #[component]
 pub fn GalleryView() -> Element {
+    let mut settings = use_layout_settings();
     let categories = ["Flagship Showcase", "Navigation Modes", "Content Layouts", "Cyber-Physical & Realtime"];
 
+    let is_dark = use_is_dark();
+
+    let root_class = if is_dark {
+        "dark min-h-screen bg-background text-foreground flex flex-col select-none transition-colors duration-150"
+    } else {
+        "min-h-screen bg-background text-foreground flex flex-col select-none transition-colors duration-150"
+    };
+
     rsx! {
-        div { class: "min-h-screen bg-background text-foreground flex flex-col select-none",
+        div { class: "{root_class}",
             // Header
             header { class: "sticky top-0 z-[300] flex h-14 items-center justify-between border-b border-border bg-background/95 px-4 sm:px-8 backdrop-blur-md",
                 div { class: "flex items-center gap-3",
@@ -166,6 +177,19 @@ pub fn GalleryView() -> Element {
                     div { class: "flex items-center gap-2",
                         span { class: "font-bold text-sm tracking-tight text-foreground", "Rust/UI Enterprise Framework" }
                         Badge { variant: BadgeVariant::Outline, "Dioxus 0.7 • Rust" }
+                    }
+                }
+
+                div { class: "flex items-center gap-3",
+                    button {
+                        r#type: "button",
+                        class: "h-8 px-2.5 rounded-md border border-input bg-background hover:bg-muted text-xs font-medium cursor-pointer transition-colors flex items-center gap-1.5",
+                        onclick: move |_| {
+                            let next = if is_dark { ThemeMode::Light } else { ThemeMode::Dark };
+                            settings.write().theme = next;
+                        },
+                        span { if is_dark { "☀" } else { "☾" } }
+                        span { if is_dark { "Light Mode" } else { "Dark Mode" } }
                     }
                 }
             }

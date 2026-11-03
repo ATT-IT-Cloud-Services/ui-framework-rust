@@ -5,6 +5,6 @@ edition = "2021"
 
 [dependencies]
 ui-framework = { path = "../ui-framework" }
-dioxus = { workspace = true, features = ["fullstack", "router", "server"] }
+dioxus = { workspace = true, features = ["web", "router"] }
 serde = { workspace = true }
 serde_json = { workspace = true }

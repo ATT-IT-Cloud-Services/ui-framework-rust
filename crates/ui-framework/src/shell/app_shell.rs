@@ -8,7 +8,7 @@ use crate::navigation::sidebar_dual::SidebarDual;
 use crate::navigation::sidebar_inset::SidebarInset;
 use crate::navigation::topnav::Topnav;
 use crate::navigation::bottom_nav::BottomNav;
-use crate::settings::provider::use_layout_settings;
+use crate::settings::provider::{use_is_dark, use_layout_settings};
 use crate::settings::customizer_drawer::CustomizerDrawer;
 use crate::config::types::{ContentWidth, NavigationMode, NavigationPosition};
 use super::header::Header;
@@ -45,6 +45,8 @@ pub fn AppShell(
     let is_nav_top = mode == NavigationMode::Topnav || pos == NavigationPosition::Top;
     let is_nav_bottom = mode == NavigationMode::BottomNav || pos == NavigationPosition::Bottom;
 
+    let is_dark = use_is_dark();
+
     // Content width constraint classes
     let content_width_class = match width {
         ContentWidth::Boxed => "max-w-7xl mx-auto w-full p-4 sm:p-6",
@@ -52,9 +54,15 @@ pub fn AppShell(
         ContentWidth::Full => "w-full h-full p-0 m-0",
     };
 
+    let root_class = if is_dark {
+        format!("dark relative flex min-h-screen w-full flex-col bg-background text-foreground transition-colors duration-150 {class}")
+    } else {
+        format!("relative flex min-h-screen w-full flex-col bg-background text-foreground transition-colors duration-150 {class}")
+    };
+
     rsx! {
         div {
-            class: "relative flex min-h-screen w-full flex-col bg-background text-foreground transition-colors duration-150 {class}",
+            class: "{root_class}",
 
             // Top Header
             if !hide_header {
@@ -73,13 +81,17 @@ pub fn AppShell(
 
             // Main layout area (Sidebar + Content Body)
             div {
-                class: if is_nav_at_end { "flex flex-1 overflow-hidden flex-row-reverse" } else { "flex flex-1 overflow-hidden" },
+                class: if is_nav_at_end {
+                    "flex flex-1 w-full items-start flex-row-reverse"
+                } else {
+                    "flex flex-1 w-full items-start"
+                },
 
                 // Desktop Sidebar
                 if !is_nav_top && !is_nav_bottom && !hide_navigation {
                     div {
                         class: if sidebar_sticky {
-                            "hidden lg:flex shrink-0 sticky top-0 h-screen overflow-hidden"
+                            "hidden lg:flex shrink-0 sticky top-[var(--header-height,48px)] h-[calc(100vh-var(--header-height,48px)-var(--footer-height,0px))] overflow-y-auto z-[100]"
                         } else {
                             "hidden lg:flex shrink-0 min-h-full h-auto"
                         },
@@ -126,9 +138,9 @@ pub fn AppShell(
                 // Content Viewport
                 main {
                     class: if mode == NavigationMode::SidebarInset {
-                        "flex-1 flex flex-col focus:outline-none p-2.5 overflow-y-auto"
+                        "flex-1 min-w-0 flex flex-col focus:outline-none p-2.5"
                     } else {
-                        "flex-1 flex flex-col focus:outline-none overflow-y-auto"
+                        "flex-1 min-w-0 flex flex-col focus:outline-none"
                     },
                     if mode == NavigationMode::SidebarInset {
                         div { class: "flex-1 rounded-xl border border-border bg-card text-card-foreground shadow-2xs overflow-hidden flex flex-col",

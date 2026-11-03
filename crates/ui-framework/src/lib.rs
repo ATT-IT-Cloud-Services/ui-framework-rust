@@ -27,7 +27,7 @@ pub use panels::*;
 pub use realtime::*;
 pub use services::*;
 pub use settings::{
-    get_mono_font_definition, get_sans_font_definition, use_component_style, use_layout_settings,
+    get_mono_font_definition, get_sans_font_definition, use_component_style, use_is_dark, use_layout_settings,
     BackdropBlur, ComponentRegistry, ContentLayoutOptions, ContentOverflowMode, ContentPadding,
     CustomComponentStyle, CustomizerDrawer, FontFamilyPreset, LayoutSettings,
     LayoutSettingsProvider, LoadingIndicatorType, LoadingSettings, MobileLayoutBehavior,

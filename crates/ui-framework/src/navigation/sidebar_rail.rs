@@ -34,63 +34,87 @@ pub fn SidebarRail(
                             let is_docked = Some(item.id.clone()) == docked_id();
                             let item_id = item.id.clone();
                             let label_first = item.label.chars().next().unwrap_or('●').to_string();
+                            let href_val = item.href.clone().unwrap_or_else(|| "#".to_string());
 
                             rsx! {
                                 div {
                                     key: "{item.id}",
                                     class: "relative",
-                                    button {
-                                        r#type: "button",
-                                        class: if is_docked {
-                                            "relative flex h-10 w-10 items-center justify-center rounded-md text-xs font-bold bg-primary text-primary-foreground shadow-xs cursor-pointer"
-                                        } else if is_active {
-                                            "relative flex h-10 w-10 items-center justify-center rounded-md text-xs font-semibold bg-primary/10 text-primary cursor-pointer"
-                                        } else {
-                                            "relative flex h-10 w-10 items-center justify-center rounded-md text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground cursor-pointer"
-                                        },
-                                        onclick: move |_| {
-                                            if has_children {
+                                    if !has_children {
+                                        a {
+                                            href: "{href_val}",
+                                            class: "block",
+                                            div {
+                                                class: if is_active {
+                                                    "relative flex h-10 w-10 items-center justify-center rounded-md text-xs font-semibold bg-primary/10 text-primary cursor-pointer transition-colors"
+                                                } else {
+                                                    "relative flex h-10 w-10 items-center justify-center rounded-md text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground cursor-pointer transition-colors"
+                                                },
+                                                title: "{item.label}",
+                                                "{label_first}"
+                                            }
+                                        }
+                                    } else {
+                                        button {
+                                            r#type: "button",
+                                            class: if is_docked {
+                                                "relative flex h-10 w-10 items-center justify-center rounded-md text-xs font-bold bg-primary text-primary-foreground shadow-xs cursor-pointer"
+                                            } else if is_active {
+                                                "relative flex h-10 w-10 items-center justify-center rounded-md text-xs font-semibold bg-primary/10 text-primary cursor-pointer"
+                                            } else {
+                                                "relative flex h-10 w-10 items-center justify-center rounded-md text-xs text-muted-foreground hover:bg-muted/70 hover:text-foreground cursor-pointer"
+                                            },
+                                            onclick: move |_| {
                                                 if open_popover_id() == Some(item_id.clone()) {
                                                     open_popover_id.set(None);
                                                 } else {
                                                     open_popover_id.set(Some(item_id.clone()));
                                                 }
-                                            }
-                                        },
-                                        title: "{item.label}",
-                                        "{label_first}"
-                                    }
+                                            },
+                                            title: "{item.label}",
+                                            "{label_first}"
+                                        }
 
-                                    // Flyout Popover
-                                    if has_children && open_popover_id() == Some(item.id.clone()) {
-                                        div {
-                                            class: "absolute start-full top-0 ms-2 z-[600] w-60 p-2 rounded-lg border border-border bg-popover text-popover-foreground shadow-xl animate-in fade-in-50",
+                                        // Flyout Popover
+                                        if open_popover_id() == Some(item.id.clone()) {
                                             div {
-                                                class: "flex items-center justify-between pb-1.5 mb-1 border-b border-border text-xs font-semibold",
-                                                span { class: "truncate", "{item.label}" }
-                                                button {
-                                                    r#type: "button",
-                                                    class: "text-[10px] px-1.5 py-0.5 rounded border border-border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer",
-                                                    onclick: {
-                                                        let id_for_dock = item.id.clone();
-                                                        move |_| {
-                                                            docked_id.set(Some(id_for_dock.clone()));
-                                                            open_popover_id.set(None);
-                                                        }
-                                                    },
-                                                    "Dauerhaft"
+                                                class: "absolute start-full top-0 ms-2 z-[600] w-60 p-2 rounded-lg border border-border bg-popover text-popover-foreground shadow-xl animate-in fade-in-50",
+                                                div {
+                                                    class: "flex items-center justify-between pb-1.5 mb-1 border-b border-border text-xs font-semibold",
+                                                    span { class: "truncate", "{item.label}" }
+                                                    button {
+                                                        r#type: "button",
+                                                        class: "text-[10px] px-1.5 py-0.5 rounded border border-border bg-muted/40 hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer",
+                                                        onclick: {
+                                                            let id_for_dock = item.id.clone();
+                                                            move |_| {
+                                                                docked_id.set(Some(id_for_dock.clone()));
+                                                                open_popover_id.set(None);
+                                                            }
+                                                        },
+                                                        "Dauerhaft"
+                                                    }
                                                 }
-                                            }
-                                            ul {
-                                                class: "space-y-0.5",
-                                                for child in item.children.iter() {
-                                                    li {
-                                                        key: "{child.id}",
-                                                        div {
-                                                            class: "flex items-center justify-between px-2 py-1 text-xs rounded hover:bg-muted/50 text-foreground cursor-pointer",
-                                                            span { "{child.label}" }
-                                                            if let Some(b) = &child.badge {
-                                                                Badge { variant: BadgeVariant::Secondary, "{b}" }
+                                                ul {
+                                                    class: "space-y-0.5",
+                                                    for child in item.children.iter() {
+                                                        {
+                                                            let child_href = child.href.clone().unwrap_or_else(|| "#".to_string());
+                                                            rsx! {
+                                                                li {
+                                                                    key: "{child.id}",
+                                                                    a {
+                                                                        href: "{child_href}",
+                                                                        class: "block",
+                                                                        div {
+                                                                            class: "flex items-center justify-between px-2.5 py-1.5 text-xs rounded hover:bg-muted text-foreground cursor-pointer transition-colors",
+                                                                            span { "{child.label}" }
+                                                                            if let Some(b) = &child.badge {
+                                                                                Badge { variant: BadgeVariant::Secondary, "{b}" }
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -126,12 +150,21 @@ pub fn SidebarRail(
                     div {
                         class: "flex-1 overflow-y-auto space-y-1",
                         for child in docked.children {
-                            div {
-                                key: "{child.id}",
-                                class: "flex items-center justify-between px-2.5 py-1.5 text-xs rounded hover:bg-muted/60 text-foreground cursor-pointer",
-                                span { "{child.label}" }
-                                if let Some(b) = child.badge {
-                                    Badge { variant: BadgeVariant::Secondary, "{b}" }
+                            {
+                                let child_href = child.href.clone().unwrap_or_else(|| "#".to_string());
+                                rsx! {
+                                    a {
+                                        key: "{child.id}",
+                                        href: "{child_href}",
+                                        class: "block",
+                                        div {
+                                            class: "flex items-center justify-between px-2.5 py-1.5 text-xs rounded hover:bg-muted/60 text-foreground cursor-pointer transition-colors",
+                                            span { "{child.label}" }
+                                            if let Some(b) = child.badge {
+                                                Badge { variant: BadgeVariant::Secondary, "{b}" }
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }

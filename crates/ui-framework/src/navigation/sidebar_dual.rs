@@ -68,12 +68,21 @@ pub fn SidebarDual(
 
                 div { class: "flex-1 overflow-y-auto space-y-0.5",
                     for child in sub_items {
-                        div {
-                            key: "{child.id}",
-                            class: "flex items-center justify-between rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer transition-colors",
-                            span { class: "truncate", "{child.label}" }
-                            if let Some(b) = child.badge {
-                                Badge { variant: BadgeVariant::Secondary, "{b}" }
+                        {
+                            let child_href = child.href.clone().unwrap_or_else(|| "#".to_string());
+                            rsx! {
+                                a {
+                                    key: "{child.id}",
+                                    href: "{child_href}",
+                                    class: "block",
+                                    div {
+                                        class: "flex items-center justify-between rounded-md px-2.5 py-1.5 text-xs text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer transition-colors",
+                                        span { class: "truncate", "{child.label}" }
+                                        if let Some(b) = child.badge {
+                                            Badge { variant: BadgeVariant::Secondary, "{b}" }
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

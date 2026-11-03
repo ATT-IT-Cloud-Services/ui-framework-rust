@@ -10,7 +10,14 @@ pub fn SidebarFull(
     header_slot: Option<Element>,
     footer_slot: Option<Element>,
 ) -> Element {
-    let mut expanded_ids = use_signal(|| Vec::<String>::new());
+    let mut expanded_ids = use_signal(|| {
+        // Auto-expand all sections that have children by default
+        vec![
+            "dispatch".to_string(),
+            "telemetry".to_string(),
+            "reports".to_string(),
+        ]
+    });
 
     // Group items by section
     let mut sections: Vec<(String, Vec<NavigationItem>)> = Vec::new();
@@ -46,18 +53,38 @@ pub fn SidebarFull(
                                     let is_active = active_id == item.id;
                                     let is_expanded = expanded_ids().contains(&item.id);
                                     let item_id = item.id.clone();
+                                    let href_val = item.href.clone().unwrap_or_else(|| "#".to_string());
 
                                     rsx! {
                                         li {
                                             key: "{item.id}",
-                                            div {
-                                                class: if is_active {
-                                                    "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-semibold bg-primary/10 text-primary cursor-pointer transition-colors"
-                                                } else {
-                                                    "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer transition-colors"
-                                                },
-                                                onclick: move |_| {
-                                                    if has_children {
+                                            if !has_children {
+                                                a {
+                                                    href: "{href_val}",
+                                                    class: "block",
+                                                    div {
+                                                        class: if is_active {
+                                                            "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-semibold bg-primary/10 text-primary cursor-pointer transition-colors"
+                                                        } else {
+                                                            "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer transition-colors"
+                                                        },
+                                                        span { class: "truncate flex-1 text-start", "{item.label}" }
+                                                        if let Some(tag) = &item.tag {
+                                                            Badge { variant: BadgeVariant::Outline, "{tag}" }
+                                                        }
+                                                        if let Some(badge) = &item.badge {
+                                                            Badge { variant: BadgeVariant::Secondary, "{badge}" }
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                div {
+                                                    class: if is_active {
+                                                        "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-semibold bg-primary/10 text-primary cursor-pointer transition-colors"
+                                                    } else {
+                                                        "group relative flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-xs font-medium text-muted-foreground hover:bg-muted/50 hover:text-foreground cursor-pointer transition-colors"
+                                                    },
+                                                    onclick: move |_| {
                                                         let mut ids = expanded_ids();
                                                         if ids.contains(&item_id) {
                                                             ids.retain(|id| id != &item_id);
@@ -65,42 +92,45 @@ pub fn SidebarFull(
                                                             ids.push(item_id.clone());
                                                         }
                                                         expanded_ids.set(ids);
+                                                    },
+                                                    span { class: "truncate flex-1 text-start", "{item.label}" }
+                                                    if let Some(tag) = &item.tag {
+                                                        Badge { variant: BadgeVariant::Outline, "{tag}" }
                                                     }
-                                                },
-                                                span { class: "truncate flex-1 text-start", "{item.label}" }
-                                                if let Some(tag) = &item.tag {
-                                                    Badge { variant: BadgeVariant::Outline, "{tag}" }
-                                                }
-                                                if let Some(badge) = &item.badge {
-                                                    Badge { variant: BadgeVariant::Secondary, "{badge}" }
-                                                }
-                                                if has_children {
+                                                    if let Some(badge) = &item.badge {
+                                                        Badge { variant: BadgeVariant::Secondary, "{badge}" }
+                                                    }
                                                     span {
-                                                        class: if is_expanded { "text-2xs text-muted-foreground rotate-90 transition-transform" } else { "text-2xs text-muted-foreground transition-transform" },
+                                                        class: if is_expanded { "text-2xs text-muted-foreground rotate-90 transition-transform cursor-pointer" } else { "text-2xs text-muted-foreground transition-transform cursor-pointer" },
                                                         "▶"
                                                     }
                                                 }
-                                            }
 
-                                            // Render children sub-accordions
-                                            if has_children && is_expanded {
-                                                ul {
-                                                    class: "mt-0.5 space-y-0.5 border-s border-border/40 ms-4 ps-1 animate-in fade-in-50 duration-150",
-                                                    for child in item.children {
-                                                        {
-                                                            let is_child_active = active_id == child.id;
-                                                            rsx! {
-                                                                li {
-                                                                    key: "{child.id}",
-                                                                    div {
-                                                                        class: if is_child_active {
-                                                                            "flex items-center justify-between rounded px-2 py-1 text-2xs font-semibold bg-primary/10 text-primary cursor-pointer"
-                                                                        } else {
-                                                                            "flex items-center justify-between rounded px-2 py-1 text-2xs text-muted-foreground hover:bg-muted/40 hover:text-foreground cursor-pointer"
-                                                                        },
-                                                                        span { class: "truncate", "{child.label}" }
-                                                                        if let Some(b) = &child.badge {
-                                                                            span { class: "text-[10px] text-muted-foreground font-mono", "{b}" }
+                                                // Submenu children links
+                                                if is_expanded {
+                                                    ul {
+                                                        class: "mt-0.5 space-y-0.5 border-s border-border/40 ms-4 ps-1 animate-in fade-in-50 duration-150",
+                                                        for child in item.children {
+                                                            {
+                                                                let is_child_active = active_id == child.id;
+                                                                let child_href = child.href.clone().unwrap_or_else(|| "#".to_string());
+                                                                rsx! {
+                                                                    li {
+                                                                        key: "{child.id}",
+                                                                        a {
+                                                                            href: "{child_href}",
+                                                                            class: "block",
+                                                                            div {
+                                                                                class: if is_child_active {
+                                                                                    "flex items-center justify-between rounded px-2.5 py-1.5 text-2xs font-semibold bg-primary/10 text-primary cursor-pointer hover:bg-primary/15 transition-colors"
+                                                                                } else {
+                                                                                    "flex items-center justify-between rounded px-2.5 py-1.5 text-2xs text-muted-foreground hover:bg-muted/40 hover:text-foreground cursor-pointer transition-colors"
+                                                                                },
+                                                                                span { class: "truncate", "{child.label}" }
+                                                                                if let Some(b) = &child.badge {
+                                                                                    span { class: "text-[10px] text-muted-foreground font-mono", "{b}" }
+                                                                                }
+                                                                            }
                                                                         }
                                                                     }
                                                                 }
