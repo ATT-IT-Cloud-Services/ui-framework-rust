@@ -35,7 +35,8 @@ pub fn SidebarFull(
             class: "flex h-full w-64 flex-col border-e border-border bg-sidebar text-sidebar-foreground transition-all duration-200 select-none {class}",
 
             if let Some(header) = header_slot {
-                div { class: "p-3 border-b border-border/60", {header} }
+                // The head keeps its height; the navigation below is the scrolling part.
+                div { class: "shrink-0 p-3 border-b border-border/60", {header} }
             }
 
             div {

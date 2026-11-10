@@ -32,7 +32,7 @@ pub fn AlarmList(
             for alarm in alarms {
                 {
                     let id_clone = alarm.id.clone();
-                    let ack = ack_handler.clone();
+                    let ack = ack_handler;
                     let (badge_variant, sev_label) = match alarm.severity {
                         AlarmSeverity::Critical => (BadgeVariant::Destructive, "CRITICAL"),
                         AlarmSeverity::High => (BadgeVariant::Destructive, "HIGH"),
