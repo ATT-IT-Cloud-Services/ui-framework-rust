@@ -6,6 +6,10 @@ use super::provider::use_i18n;
 pub fn LanguageSwitcher(
     #[props(default = false)] show_name: bool,
     #[props(default = "")] class: &'static str,
+    /// Accessible name of the trigger; defaults to the locale name.
+    #[props(default = None)] label: Option<String>,
+    /// Emoji flags can be switched off, e.g. where the host draws its own.
+    #[props(default = true)] show_flag: bool,
 ) -> Element {
     let mut i18n = use_i18n();
     let mut open = use_signal(|| false);
@@ -18,8 +22,12 @@ pub fn LanguageSwitcher(
             button {
                 r#type: "button",
                 class: "inline-flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-medium rounded-md border border-input bg-background hover:bg-muted/40 transition-colors cursor-pointer",
+                aria_label: label.clone().unwrap_or_else(|| current.native_name().to_string()),
+                title: label.clone().unwrap_or_else(|| current.native_name().to_string()),
                 onclick: move |_| open.set(!open()),
-                span { "{current.flag()}" }
+                if show_flag {
+                    span { "{current.flag()}" }
+                }
                 if show_name {
                     span { "{current.native_name()}" }
                 }
@@ -51,7 +59,9 @@ pub fn LanguageSwitcher(
                                         open.set(false);
                                     },
                                     div { class: "flex items-center gap-2",
-                                        span { "{loc.flag()}" }
+                                        if show_flag {
+                                            span { "{loc.flag()}" }
+                                        }
                                         span { "{loc.native_name()}" }
                                     }
                                     span { class: "text-[10px] text-muted-foreground uppercase", "{loc.direction().as_str()}" }

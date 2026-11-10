@@ -29,6 +29,18 @@ pub fn AppShell(
     sidebar_header_slot: Option<Element>,
     sidebar_footer_slot: Option<Element>,
     footer_slot: Option<Element>,
+    /// Forwarded to the header: every visible label can be localised by the host.
+    #[props(default = "Search".to_string())] search_label: String,
+    #[props(default = "Ctrl+K".to_string())] search_shortcut: String,
+    #[props(default = "Toggle theme".to_string())] theme_label: String,
+    #[props(default = "Change language".to_string())] language_label: String,
+    #[props(default = false)] hide_search: bool,
+    #[props(default = false)] hide_language: bool,
+    #[props(default = false)] hide_theme: bool,
+    /// Accessible name of the mobile menu trigger.
+    #[props(default = "Open navigation".to_string())] menu_label: String,
+    /// Optional mobile navigation trigger, forwarded to the header.
+    #[props(default = None)] on_menu: Option<EventHandler<()>>,
     children: Element,
 ) -> Element {
     let settings = use_layout_settings();
@@ -71,6 +83,15 @@ pub fn AppShell(
                     actions_slot: header_slot,
                     user_menu_slot: user_menu_slot,
                     on_search: move |_| command_palette_open.set(true),
+                    search_label: search_label.clone(),
+                    search_shortcut: search_shortcut.clone(),
+                    theme_label: theme_label.clone(),
+                    language_label: language_label.clone(),
+                    hide_search: hide_search,
+                    hide_language: hide_language,
+                    hide_theme: hide_theme,
+                    on_menu: on_menu,
+                    menu_label: menu_label.clone(),
                 }
             }
 
@@ -91,7 +112,8 @@ pub fn AppShell(
                 if !is_nav_top && !is_nav_bottom && !hide_navigation {
                     div {
                         class: if sidebar_sticky {
-                            "hidden lg:flex shrink-0 sticky top-[var(--header-height,48px)] h-[calc(100vh-var(--header-height,48px)-var(--footer-height,0px))] overflow-y-auto z-[100]"
+                            // The sidebar scrolls inside itself; its header stays visible.
+                            "hidden lg:flex shrink-0 sticky top-[var(--header-height,48px)] h-[calc(100vh-var(--header-height,48px)-var(--footer-height,0px))] overflow-hidden z-[100]"
                         } else {
                             "hidden lg:flex shrink-0 min-h-full h-auto"
                         },

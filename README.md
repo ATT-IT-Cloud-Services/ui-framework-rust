@@ -84,6 +84,41 @@ fn App() -> Element {
 
 ---
 
+## 4a. Localising the header
+
+The header takes its copy from the host, so an application keeps its own language instead
+of the framework's English defaults. Every control can also be switched off when the host
+renders its own.
+
+```rust
+AppShell {
+    // labels (German in this example)
+    search_label: "Suchen",
+    search_shortcut: "Strg+K",
+    theme_label: "Darstellung wechseln",
+    language_label: "Sprache wechseln",
+    menu_label: "Menü",
+    // controls the host already draws itself
+    hide_search: true,
+    hide_language: true,
+    hide_theme: false,
+    // mobile navigation trigger (renders a hamburger below `lg`)
+    on_menu: move |_| menu_open.set(true),
+    // slots
+    logo_slot: rsx! { /* brand */ },
+    sidebar_header_slot: rsx! { /* brand + search */ },
+    header_slot: rsx! { /* tenant picker, language flag */ },
+    user_menu_slot: rsx! { /* account */ },
+    navigation_items: nav,
+    /* … */
+}
+```
+
+Icons are inline SVG (a magnifier, a sun and a moon, a hamburger) — no emoji, no icon
+font. The sidebar head (`sidebar_header_slot`) keeps its height while the navigation below
+scrolls; the `AppShell` wrapper no longer scrolls the whole sidebar.
+
+
 ## 5. Repositories
 
 - **Monorepo (Framework + Demo Gallery)**: [https://github.com/ATT-IT-Cloud-Services/ui-framework-rust](https://github.com/ATT-IT-Cloud-Services/ui-framework-rust)

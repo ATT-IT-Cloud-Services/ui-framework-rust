@@ -21,6 +21,7 @@ impl SupportedLocale {
         }
     }
 
+    #[allow(clippy::should_implement_trait)] // the public API keeps this name
     pub fn from_str(s: &str) -> Self {
         match s {
             "de" => Self::De,
